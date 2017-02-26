@@ -1,0 +1,4 @@
+#!/bin/bash
+
+echo "you should source .pip/bin/activate"
+
