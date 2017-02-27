@@ -2,6 +2,7 @@ import logging
 import os
 import json
 import sys
+from object_detector import ObjectDetector
 
 
 class Main:
@@ -36,4 +37,4 @@ class Main:
         self.logger = logging
 
     def startApp(self):
-        self.logger.debug('TODO call cv2')
+        o = ObjectDetector(self)
