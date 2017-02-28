@@ -1,4 +1,5 @@
 from networktables import NetworkTables 
+import threading as th
 
 TABLE_NAME = 'ImageProc'
 DO_WORK_NAME = 'calculate'
@@ -12,6 +13,7 @@ class TableManager:
         self.vision_table = NetworkTables.getTable(TABLE_NAME)
         self.do_work = self.vision_table.getBoolean(DO_WORK_NAME, False)
         self.work = work_method
+        self.do_work_lock = th.Lock()
 
         self.vision_table.addTableListener(self.do_work_changed, True, DO_WORK_NAME, False)
 
@@ -41,15 +43,32 @@ class TableManager:
         self.vision_table.putString(HORIZONTAL_DATA_NAME, horizontal_vector + str(horizontal_distance))
         self.vision_table.putNumber(VERTICAL_DATA_NAME, vertical_distance)
 
+    def get_do_work(self):
+        """Return the value of do_work (thread-safe)"""
+        with self.do_work_lock:
+            return self.do_work
+
+    def set_do_work(self, value):
+        """Set the value of do_work (thread-safe)"""
+        with self.do_work_lock:
+            if type(value) is type(self.do_work):
+                self.do_work = value
+
     def is_do_work(self):
         """Return True if the robot requesting calculation for target navigation"""
-        return self.do_work
+        return self.get_do_work()
 
     def start_work(self):
-        pass
+        """Start the work loop"""
+        th.Thread(target=self.work_loop).start()
 
-    def stop_work(self):
-        pass
+    def work_loop(self):
+        """Start work given while do_work is True"""
+        is_do_work = self.get_do_work()
+
+        while is_do_work:
+            self.work()
+            is_do_work = self.get_do_work()
 
     def do_work_changed(self, table, key, value, isNew):
         """
@@ -58,8 +77,6 @@ class TableManager:
         While the indecator is True the work method is called, if False stop doing work
         """
         if key == DO_WORK_NAME:
-            self.do_work = value
+            self.set_do_work(value)
             if value is True:
                 self.start_work()
-            else:
-                self.stop_work()
