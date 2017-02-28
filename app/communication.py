@@ -6,11 +6,13 @@ HORIZONTAL_DATA_NAME = 'horizontal'
 VERTICAL_DATA_NAME = 'vertical'
 
 class TableManager:
-    def __init__(self):
+    def __init__(self, work_method):
         self.startup()
 
         self.vision_table = NetworkTables.getTable(TABLE_NAME)
         self.do_work = self.vision_table.getBoolean(DO_WORK_NAME, False)
+        self.work = work_method
+
         self.vision_table.addTableListener(self.do_work_changed, True, DO_WORK_NAME, False)
 
     def startup(self):
@@ -43,7 +45,21 @@ class TableManager:
         """Return True if the robot requesting calculation for target navigation"""
         return self.do_work
 
+    def start_work(self):
+        pass
+
+    def stop_work(self):
+        pass
+
     def do_work_changed(self, table, key, value, isNew):
-        """Handle change in the work request indicator"""
+        """
+        Handle change in the work request indicator
+
+        While the indecator is True the work method is called, if False stop doing work
+        """
         if key == DO_WORK_NAME:
             self.do_work = value
+            if value is True:
+                self.start_work()
+            else:
+                self.stop_work()
