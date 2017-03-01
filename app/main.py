@@ -8,6 +8,9 @@ from jsonmerge import merge
 
 class Main:
     def __init__(self,options):
+        if not os.path.exists('log'):
+            os.makedirs('log')
+
         self.initConfig(options)
         self.init_logger()
         self.logger.debug('Starting app %s' %self.config['version'])
