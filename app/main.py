@@ -10,7 +10,7 @@ class Main:
     def __init__(self,options):
         self.initConfig(options)
         self.init_logger()
-        self.logger.debug('Starting app')
+        self.logger.debug('Starting app %s' %self.config['version'])
 
     def initConfig(self,options):
         with open('config/application.json') as json_data_file:
@@ -25,6 +25,7 @@ class Main:
 
     def init_logger(self):
         logging.basicConfig(filename='log/{env}.log'.format(env=self.env()),level=logging.DEBUG,format='%(asctime)s [%(levelname)s] %(message)s')
+        logging.captureWarnings(True)
         root = logging.getLogger()
 
         ch = logging.StreamHandler(sys.stdout)
