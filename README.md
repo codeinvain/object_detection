@@ -4,7 +4,7 @@ python object detection using cv2 (opencv)
 
 ## Installation
 ### prerequesits
-osx - brew install opencv3
+osx - brew install --force opencv3  --with-java --with-python3 --with-contrib --with-ffmpeg --with-qt5
 linux - TODO
 ###  clone & setup
 git clone git@github.com:codeinvain/object_detection.git

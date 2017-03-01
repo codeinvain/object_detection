@@ -1,4 +1,12 @@
 {
+  "default":{
+    "camera":0,
+    "detection":{
+      "hue":[53.7,66.1],
+      "saturation":[0,8.2],
+      "value":[226.2,255]
+    }
+  },
   "development":{
   },
   "production":{

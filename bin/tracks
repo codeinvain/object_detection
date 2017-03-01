@@ -2,23 +2,35 @@
 
 
 import sys
+import argparse
+
 import os.path
-import cli.app
+
 app_path = os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir,'app'))
 sys.path.append(app_path)
-import tracks
+import main
 
-main = tracks.Main()
-main.startApp()
 
-@cli.app.CommandLineApp
-def router(app):
-    print(app)
-    pass
 
-router.add_param("-d", "--daemon", help="start in daemon mode", default=False)
-router.add_param("-g", "--gui", help="graphical user interface debugger", default=False)
+
+def start():
+    parser = argparse.ArgumentParser()
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument("-g", "--gui", action="store_true",help='launch debug gui window')
+    parser.add_argument("-c",'--camera', type=int, help="usb camera port index")
+
+    options = vars(parser.parse_args())
+
+    empty_keys = [k for k,v in options.items() if v==None]
+    for k in empty_keys:
+        del options[k]
+    
+
+
+    app = main.Main(options)
+    app.startApp()
+
 
 if __name__ == "__main__":
-    router.run()
+    start()
 
