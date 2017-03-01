@@ -1,7 +1,9 @@
 import cv2
 import time
 import numpy as np
+import imutils
 
+import tracks
 
 
 class ObjectDetector:
@@ -9,32 +11,48 @@ class ObjectDetector:
     def report(self):
         pass
 
-    def __init__(self,app,options):
-        self.options = options
+
+    def __init__(self):
         
-        app.logger.debug(""" opencv version: """+cv2.__version__)
-        app.logger.info("capturing camera port "+str(app.config["camera"]))
+        tracks.logger.debug(""" opencv version: """+cv2.__version__)
+        tracks.logger.info("capturing camera port "+str(tracks.config["camera"]))
         firstFrame = None
-        camera = cv2.VideoCapture(app.config['camera'])
-        low = np.array([app.config['detection']['hue'][0],app.config['detection']['saturation'][0],app.config['detection']['value'][0]])
-        heigh = np.array([app.config['detection']['hue'][1],app.config['detection']['saturation'][1],app.config['detection']['value'][1]])
+        camera = cv2.VideoCapture(tracks.config['camera'])
+        low = np.array(tracks.config['detection']['from_color']) # [h,v,s] color format
+        heigh = np.array(tracks.config['detection']['to_color'])
+        blur_radius = tracks.config['detection']['blur_radius']
 
         while True:
             (grabbed, frame) = camera.read()
             if not grabbed:
                 break
 
-            blur = cv2.blur(frame, (7,7))
-            # Convert BGR to HSV
+            # blure image 
+            blur = cv2.blur(frame, (blur_radius,blur_radius))
+            # convert to hsv
             hsv = cv2.cvtColor(blur, cv2.COLOR_BGR2HSV)
+            # mask by low / heigh hsv values
             mask = cv2.inRange(hsv, low, heigh)
 
-            # Bitwise-AND mask and original image
-            res = cv2.bitwise_and(frame,frame, mask= mask)
-            if (options['gui']==True):
-                display = cv2.resize(mask, (0,0), fx=0.5,fy=0.5) 
-                cv2.imshow('frame',display)
-                if cv2.waitKey(1) & 0xFF == ord('q'):
-                    break
+            dialateElm =cv2.getStructuringElement(cv2.MORPH_RECT,(24,24))
+            erodeElm =cv2.getStructuringElement(cv2.MORPH_RECT,(12,12))
+            mask = cv2.erode(mask, erodeElm, iterations=2)
+            mask = cv2.dilate(mask, dialateElm, iterations=2)
+
+            final =mask 
+
+            if self.debug('frame',final):
+                break
+            cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,
+		        cv2.CHAIN_APPROX_SIMPLE)[-2]
+
+            tracks.logger.debug('cnts %d' %len(cnts))
 
 
+    def debug(self,name,frame):
+        if (tracks.config['gui']==True):
+            display = imutils.resize(frame, width=600)
+            cv2.imshow('frame',display)
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                return True
+        return False

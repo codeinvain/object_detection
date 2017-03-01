@@ -4,9 +4,9 @@
     "server":"10.43.20.2",
     "camera":0,
     "detection":{
-      "hue":[53.7,66.1],
-      "saturation":[0,8.2],
-      "value":[226.2,255]
+      "from_color":[53.7,0,226.2],
+      "to_color":[66.1,8.2,255],
+      "blur_radius":10
     }
   },
   "development":{
