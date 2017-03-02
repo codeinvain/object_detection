@@ -1,18 +1,22 @@
 #!/usr/bin/env bash
 
-python3 -m venv .pip
-source .pip/bin/activate
-pip3 install -U 
 
 case "$OSTYPE" in
   solaris*) echo "SOLARIS" ;;
   darwin*)  
+    python3 -m venv .pip
+    source .pip/bin/activate
+    pip3 install -r requirements.txt
     mv .pip/lib/python3.5/site-packages/cv2/cv2.cpython-35m-darwin.so .pip/lib/python3.5/site-packages/cv2/cv2.cpython-35m-darwin.orig.so
     cp deps/cv2.cpython-35m-darwin.so .pip/lib/python3.5/site-packages/cv2/cv2.cpython-35m-darwin.so
   ;;
   linux*)   echo "LINUX" ;;
+    pip3 install -r requirements.txt
   bsd*)     echo "BSD" ;;
   msys*)    echo "WINDOWS" ;;
+    python3 -m venv .pip
+    .pip\Scripts\activate.bat
+    pip3 install -r requirements.txt
   *)        echo "unknown: $OSTYPE" ;;
 esac
 
