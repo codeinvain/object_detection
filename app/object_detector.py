@@ -2,8 +2,8 @@ import cv2
 import time
 import numpy as np
 import imutils
-
 import tracks
+from target import Target
 
 
 class ObjectDetector:
@@ -43,10 +43,32 @@ class ObjectDetector:
 
             if self.debug('frame',final):
                 break
-            cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL,
-		        cv2.CHAIN_APPROX_SIMPLE)[-2]
+            cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
 
-            tracks.logger.debug('cnts %d' %len(cnts))
+            if (len(cnts)>1):
+                self.find_and_report_target(cnts)
+
+
+    def find_and_report_target(self,cnts):
+        targets = list(map(lambda c: Target(c) ,cnts))
+        pair = self.find_pair(targets)
+
+
+
+    def find_pair(self,targets):
+        pair = []
+        left  = list(targets)
+        right = list(targets)
+
+        for l in left:
+            t = [abs(l.rect().h -r.rect().h) for r in right]
+            ind = t.index(min(t))
+            pair.append((l,right[ind]))
+            left.remove(l)
+            right.remove(right[ind])
+        return pair
+
+
 
 
     def debug(self,name,frame):
@@ -56,3 +78,5 @@ class ObjectDetector:
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 return True
         return False
+
+

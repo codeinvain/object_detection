@@ -3,6 +3,10 @@
     "version":"1.0.0",
     "server":"10.43.20.2",
     "camera":0,
+    "target":{
+      "min_ratio":0.35,
+      "max_ratio":0.55
+    },
     "detection":{
       "from_color":[53.7,0,226.2],
       "to_color":[66.1,8.2,255],
