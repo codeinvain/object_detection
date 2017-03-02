@@ -21,7 +21,9 @@ def bootstrap(options):
     create_pid()
     initConfig(options)
     init_logger()
-    logger.debug('Starting app v{0} on pid: {1}'.format(config['version'], os.getpid()))
+    logger.info('Starting app v{0} on pid: {1}'.format(config['version'], os.getpid()))
+    logger.debug('With config:')
+    logger.debug(config)
 
     atexit.register(delete_pid)
 

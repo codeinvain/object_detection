@@ -14,7 +14,7 @@ class ObjectDetector:
 
 
     def __init__(self):
-        tracks.logger.debug(""" opencv version: """+cv2.__version__)
+        tracks.logger.info(""" opencv version: """+cv2.__version__)
         tracks.logger.info("capturing camera port "+str(tracks.config["camera"]))
         self._detection_status = False
         firstFrame = None
