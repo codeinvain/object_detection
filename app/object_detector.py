@@ -27,8 +27,8 @@ class ObjectDetector:
 
         while True:
             (grabbed, frame) = camera.read()
-            if not grabbed or self._detection_status==False:
-                continue
+            if not grabbed:
+                break
 
             # blure image 
             blur = cv2.blur(frame, (blur_radius,blur_radius))
@@ -44,8 +44,11 @@ class ObjectDetector:
 
             final =mask 
 
-            if self.debug('frame',final):
-                break
+
+            self.debug('frame',final)
+            if self._detection_status==False:
+                continue
+
             cnts = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
 
             if (len(cnts)>1):
