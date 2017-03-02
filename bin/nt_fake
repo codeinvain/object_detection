@@ -1,0 +1,11 @@
+#!/bin/bash
+
+
+case $1 in
+  'on')
+    kill -USR1 $(cat tmp/tracks.pid)
+  ;;
+  'off')
+    kill -USR2 $(cat tmp/tracks.pid)
+  ;;
+esac

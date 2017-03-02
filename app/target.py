@@ -5,6 +5,7 @@ from ostruct import OpenStruct
 class Target:
     def __init__(self,contour):
         self.contour = contour
+        self._ratio = None
         self._rect = None
 
     def area(self):
@@ -23,10 +24,10 @@ class Target:
 
 
     def isValid(self):
-        return isInRatio()
+        return self.isInRatio()
 
     # expecting ratio of 2/5 ~ 0.4 
     def isInRatio(self):
-        return self.raio() > tracks.config['target']['min_ratio'] and self.ratio() < tracks.config['target']['max_ratio']
+        return self.ratio() > tracks.config['target']['min_ratio'] and self.ratio() < tracks.config['target']['max_ratio']
 
 

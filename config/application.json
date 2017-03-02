@@ -3,6 +3,7 @@
     "version":"1.0.0",
     "server":"10.43.20.2",
     "camera":0,
+    "networktables": true,
     "target":{
       "min_ratio":0.35,
       "max_ratio":0.55

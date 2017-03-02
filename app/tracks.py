@@ -4,6 +4,7 @@ import json
 import sys
 from object_detector import ObjectDetector
 from jsonmerge import merge
+import atexit
 
 
 config = {}
@@ -14,9 +15,25 @@ def bootstrap(options):
     if not os.path.exists('log'):
         os.makedirs('log')
 
+    if not os.path.exists('tmp'):
+        os.makedirs('tmp')
+
+    create_pid()
     initConfig(options)
     init_logger()
-    logger.debug('Starting app %s' %config['version'])
+    logger.debug('Starting app v{0} on pid: {1}'.format(config['version'], os.getpid()))
+
+    atexit.register(delete_pid)
+
+
+def create_pid():
+    f = open('tmp/tracks.pid', 'w')
+    f.write("{0}".format(os.getpid()))  
+    f.close()  
+    
+
+def delete_pid():
+    os.remove('tmp/tracks.pid')
 
 def initConfig(options):
     with open('config/application.json') as json_data_file:
@@ -36,7 +53,7 @@ def init_logger():
 
     ch = logging.StreamHandler(sys.stdout)
     ch.setLevel(logging.DEBUG)
-    formatter = logging.Formatter('[%(levelname)s] %(message)s')
+    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
     ch.setFormatter(formatter)
     root.addHandler(ch)
 

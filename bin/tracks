@@ -15,8 +15,11 @@ import tracks
 
 def start():
     parser = argparse.ArgumentParser()
-    group = parser.add_mutually_exclusive_group()
-    group.add_argument("-g", "--gui", action="store_true",help='launch debug gui window')
+    # group = parser.add_mutually_exclusive_group()
+    parser.add_argument("-g", "--gui", action="store_true",help='launch debug gui window')
+    parser.add_argument('--networktables', dest='networktables', action='store_true')
+    parser.add_argument('--no-networktables', dest='networktables', action='store_false')
+    parser.set_defaults(networktables=True)
     parser.add_argument("-c",'--camera', type=int, help="usb camera port index")
     parser.add_argument("-s",'--server', type=str, help="usb camera port index")
 
