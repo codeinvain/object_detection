@@ -3,38 +3,64 @@ import os
 import json
 import sys
 from object_detector import ObjectDetector
+from jsonmerge import merge
+import atexit
 
 
-class Main:
-    def __init__(self):
-        self.initConfig()
-        self.init_logger()
-        self.logger.debug('Starting app')
+config = {}
+logger = None
 
-    def initConfig(self):
-        with open('config/application.json') as json_data_file:
-            self.cfg = json.load(json_data_file)
+def bootstrap(options):
 
-    def env(self):
-        return os.getenv('PY_ENV','development')
+    if not os.path.exists('log'):
+        os.makedirs('log')
 
-    def config(self):
-        return self.cfg[self.env()]
+    if not os.path.exists('tmp'):
+        os.makedirs('tmp')
 
-    def get_logger(self):
-        return logging
+    create_pid()
+    initConfig(options)
+    init_logger()
+    logger.info('Starting app v{0} on pid: {1}'.format(config['version'], os.getpid()))
+    logger.debug('With config:')
+    logger.debug(config)
 
-    def init_logger(self):
-        logging.basicConfig(filename='log/{env}.log'.format(env=self.env()),level=logging.DEBUG,format='%(asctime)s [%(levelname)s] %(message)s')
-        root = logging.getLogger()
+    atexit.register(delete_pid)
 
-        ch = logging.StreamHandler(sys.stdout)
-        ch.setLevel(logging.DEBUG)
-        formatter = logging.Formatter('[%(levelname)s] %(message)s')
-        ch.setFormatter(formatter)
-        root.addHandler(ch)
 
-        self.logger = logging
+def create_pid():
+    f = open('tmp/tracks.pid', 'w')
+    f.write("{0}".format(os.getpid()))  
+    f.close()  
+    
 
-    def startApp(self):
-        o = ObjectDetector(self)
+def delete_pid():
+    os.remove('tmp/tracks.pid')
+
+def initConfig(options):
+    with open('config/application.json') as json_data_file:
+        cfg = json.load(json_data_file)
+        global config
+        config = merge(merge(cfg['default'],cfg[env()]),options)
+
+
+def env():
+    return os.getenv('PY_ENV','development')
+
+
+def init_logger():
+    logging.basicConfig(filename='log/{env}.log'.format(env=env()),level=logging.DEBUG,format='%(asctime)s [%(levelname)s] %(message)s')
+    logging.captureWarnings(True)
+    root = logging.getLogger()
+
+    ch = logging.StreamHandler(sys.stdout)
+    ch.setLevel(logging.DEBUG)
+    formatter = logging.Formatter('%(asctime)s [%(levelname)s] %(message)s')
+    ch.setFormatter(formatter)
+    root.addHandler(ch)
+
+    global logger
+    logger = logging
+
+def startApp():
+    o = ObjectDetector()
