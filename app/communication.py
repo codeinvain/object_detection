@@ -4,21 +4,28 @@ import signal
 import tracks
 
 
-TABLE_NAME = 'ImageProc'
-DO_WORK_NAME = 'calculate'
-HORIZONTAL_DATA_NAME = 'horizontal'
-VERTICAL_DATA_NAME = 'vertical'
-ANGLE_DATA_NAME = 'angle'
-
 class TableManager:
     def __init__(self, detection_status_method):
         self.do_work_lock = th.Lock()
         self.set_detection_status = detection_status_method
         self.do_work = False
 
+        self.load_config()
+
         self.init_signals()
         if (tracks.config['networktables']==True):
+            tracks.logger.debug('started communications module with networktable')
             self.init_network_tables()
+        else:
+            tracks.logger.debug('started communications module without networktable')
+
+
+    def load_config(self):
+        """Load data from config file"""
+        self.do_work_name = tracks.config['table_names']['do_work']
+        self.horizontal_data_name = tracks.config['table_names']['horizontal_data_name']
+        self.vertical_data_name = tracks.config['table_names']['vertiacl_data']
+        self.angle_data_name = tracks.config['table_names']['angle_data_name']
 
 
     def init_signals(self):
@@ -28,16 +35,18 @@ class TableManager:
 
     def init_network_tables(self):
         """Connection and setup of the networktables"""
-        NetworkTables.initialize(server='10.43.20.2')
-        self.vision_table = NetworkTables.getTable(TABLE_NAME)
-        self.do_work = self.vision_table.getBoolean(DO_WORK_NAME, False)
+        NetworkTables.initialize(server=tracks.config['server'])
+        self.vision_table = NetworkTables.getTable(tracks.config['table_names']['main_table'])
+        self.do_work = self.vision_table.getBoolean(self.do_work_name, False)
 
-        self.vision_table.putString(HORIZONTAL_DATA_NAME, 'L0')
-        self.vision_table.putString(ANGLE_DATA_NAME, 'L0')
-        self.vision_table.putNumber(VERTICAL_DATA_NAME, 0)
-        self.vision_table.putBoolean(DO_WORK_NAME, False)
+        self.vision_table.putString(self.horizontal_data_name, 'L0')
+        self.vision_table.putString(self.angle_data_name, 'L0')
+        self.vision_table.putNumber(self.vertical_data_name, 0)
+        self.vision_table.putBoolean(self.do_work_name, False)
 
-        self.vision_table.addTableListener(self.do_work_changed, True, DO_WORK_NAME, False)
+        self.vision_table.addTableListener(self.do_work_changed, True, self.do_work_name, False)
+
+        tracks.logger.debug('connected to networktable')
 
 
     def mock_network_tables(self,signum, stack):
@@ -71,11 +80,11 @@ class TableManager:
         void
         """
         if (tracks.config['networktables']==True):
-            self.vision_table.putString(HORIZONTAL_DATA_NAME, horizontal_vector + str(horizontal_distance))
-            self.vision_table.putString(ANGLE_DATA_NAME, horizontal_vector + str(angle_to_target))
-            self.vision_table.putNumber(VERTICAL_DATA_NAME, vertical_distance)
+            self.vision_table.putString(self.horizontal_data_name, horizontal_vector + str(horizontal_distance))
+            self.vision_table.putString(self.angle_data_name, horizontal_vector + str(angle_to_target))
+            self.vision_table.putNumber(self.vertical_data_name, vertical_distance)
         else:
-            tracks.logger.debug("would send coordinate distance_x:{0} distance_y:{1} angle:{2} ".format(horizontal_distance,horizontal_vector,vertical_distance))
+            tracks.logger.debug("would send coordinate distance_x:{0}{1} distance_y:{2} angle:{3} ".format(horizontal_vector,horizontal_distance,vertical_distance,angle_to_target))
 
     def get_do_work(self):
         """Return the value of do_work (thread-safe)"""
@@ -111,7 +120,8 @@ class TableManager:
 
         While the indecator is True the work method is called, if False stop doing work
         """
-        if key == DO_WORK_NAME:
+        if key == self.do_work_name:
+            tracks.logger.debug('do work changed to ' + str(value))
             self.set_do_work(value)
             if value is True:
                 self.start_work()
