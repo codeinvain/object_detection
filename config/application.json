@@ -12,6 +12,13 @@
       "from_color":[53.7,0,226.2],
       "to_color":[66.1,8.2,255],
       "blur_radius":10
+    },
+    "table_names":{
+      "main_table":"ImageProc",
+      "horizontal_data":"horizontal",
+      "vertical_data":"vertical",
+      "angle_data":"angle",
+      "do_work":"calculate"
     }
   },
   "development":{
